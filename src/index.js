@@ -12,9 +12,9 @@ const port = process.env.PORT || 3000;
 //     } else next();
 // });
 
-app.use((req, res, next) => {
-    res.status(503).send("Website is in maintenance please return later. ty bb");
-});
+// app.use((req, res, next) => {
+//     res.status(503).send("Website is in maintenance please return later. ty bb");
+// });
 
 app.use(express.json());
 app.use(UserRouter);
