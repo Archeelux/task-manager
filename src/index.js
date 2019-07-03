@@ -8,6 +8,9 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
+// Users
+////////////
+// INSERT
 app.post("/users", async (req, res) => {
     const user = new User(req.body);
 
@@ -19,6 +22,7 @@ app.post("/users", async (req, res) => {
     }
 });
 
+// SELECT ALL
 app.get("/users", async (req, res) => {
     try {
         const users = await User.find({});
@@ -28,6 +32,7 @@ app.get("/users", async (req, res) => {
     }
 });
 
+// SELECT SINGLE
 app.get("/users/:id", async (req, res) => {
     const _id = req.params.id;
 
@@ -40,6 +45,7 @@ app.get("/users/:id", async (req, res) => {
     }
 });
 
+// UPDATE
 app.patch("/users/:id", async (req, res) => {
     const updates = Object.keys(req.body);
     const allowedUpdates = ["name", "email", "password", "age"];
@@ -56,6 +62,9 @@ app.patch("/users/:id", async (req, res) => {
     }
 });
 
+// Tasks
+////////////
+// INSERT
 app.post("/tasks", async (req, res) => {
     const task = new Task(req.body);
 
@@ -67,6 +76,7 @@ app.post("/tasks", async (req, res) => {
     }
 });
 
+// SELECT ALL
 app.get("/tasks", async (req, res) => {
     try {
         const tasks = await Task.find({});
@@ -76,6 +86,7 @@ app.get("/tasks", async (req, res) => {
     }
 });
 
+// SELECT SINGLE
 app.get("/tasks/:id", async (req, res) => {
     const _id = req.params.id;
 
@@ -88,6 +99,24 @@ app.get("/tasks/:id", async (req, res) => {
     }
 });
 
+// UPDATE
+app.patch("/tasks/:id", async (req, res) => {
+    const updates = Object.keys(req.body);
+    const allowedUpdates = ["description", "completed"];
+    const isValidOperation = updates.every(update => allowedUpdates.includes(update));
+
+    if (!isValidOperation) return res.status(400).send({ error: "Invalid updates!" });
+
+    try {
+        const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        if (!task) return res.status(404).send(task);
+        res.send(task);
+    } catch (e) {
+        res.status(400).send(e);
+    }
+});
+
+// START SERVER
 app.listen(port, () => {
     console.log(`Server is on ${port}`);
 });
