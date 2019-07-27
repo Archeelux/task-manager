@@ -1,7 +1,7 @@
 const express = require("express");
-const router = new express.Router();
 const Task = require("../models/task");
 const auth = require("../middleware/auth");
+const router = new express.Router();
 
 // INSERT
 router.post("/tasks", auth, async (req, res) => {
@@ -19,13 +19,29 @@ router.post("/tasks", auth, async (req, res) => {
     }
 });
 
-// SELECT ALL
+// GET /tasks?completed=(true|false)
+// GET /tasks?limit=10&skip=0
 router.get("/tasks", auth, async (req, res) => {
+    const match = {};
+
+    if (req.query.completed) {
+        match.completed = req.query.completed === "true";
+    }
+
     try {
-        const tasks = await Task.find({ owner: req.user.id });
-        res.send(tasks);
+        await req.user
+            .populate({
+                path: "tasks",
+                match,
+                options: {
+                    limit: parseInt(req.query.limit),
+                    skip: parseInt(req.query.skip)
+                }
+            })
+            .execPopulate();
+        res.send(req.user.tasks);
     } catch (e) {
-        res.status(500).send(e);
+        res.status(500).send();
     }
 });
 
